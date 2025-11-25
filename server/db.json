@@ -1,23 +1,86 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": 383390,
       "mobile": "8142088088",
       "password": "8142088088",
       "role": "manager",
       "name": "Manager"
     },
     {
-      "id": 1763905627976.059,
+      "id": 921367,
+      "mobile": "9999999999",
+      "password": "9999999999",
+      "role": "manager",
+      "name": "Test Manager 2"
+    },
+    {
+      "id": 620940,
       "mobile": "7675878984",
       "password": "7675878984",
       "role": "user",
       "name": "Srinivas Ellandula"
+    },
+    {
+      "id": 338409,
+      "mobile": "7675878985",
+      "password": "7675878985",
+      "role": "user",
+      "name": "Manoj Bollena"
+    },
+    {
+      "id": 346044,
+      "mobile": "7675378984",
+      "password": "7675378984",
+      "role": "user",
+      "name": "Shahanaz Shaik"
+    },
+    {
+      "id": 275515,
+      "mobile": "7625878984",
+      "password": "7625878984",
+      "role": "user",
+      "name": "Asif Shaik"
+    },
+    {
+      "id": 864515,
+      "mobile": "7677878984",
+      "password": "7677878984",
+      "role": "user",
+      "name": "Krishna Maheshwara"
+    },
+    {
+      "id": 611744,
+      "mobile": "7675870984",
+      "password": "7675870984",
+      "role": "user",
+      "name": "Sasata Mukharjee"
+    },
+    {
+      "id": 998503,
+      "mobile": "7605878984",
+      "password": "7605878984",
+      "role": "user",
+      "name": "Ayesha"
+    },
+    {
+      "id": 992022,
+      "mobile": "7675078984",
+      "password": "7675078984",
+      "role": "user",
+      "name": "Hari Krishna E"
+    },
+    {
+      "id": 562730,
+      "mobile": "7856589565",
+      "password": "7856589565",
+      "role": "user",
+      "name": "Manikanta"
     }
   ],
   "resources": [
     {
-      "id": 1763905627974.1663,
+      "id": 522940,
       "name": "Srinivas Ellandula",
       "project": "PSCRF",
       "joiningDate": "2024-11-25",
@@ -25,12 +88,109 @@
       "diet": "Non veg",
       "skills": "React JS, Node JS, Express JS",
       "gender": "Male",
-      "mobile": "7675878984"
+      "mobile": "7675878984",
+      "managerId": 383390
+    },
+    {
+      "id": 910630,
+      "name": "Manoj Bollena",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-20",
+      "birthday": "1989-03-28",
+      "diet": "Non veg",
+      "skills": "Manual testing, Zephyr, Selenium",
+      "gender": "Male",
+      "mobile": "7675878985",
+      "managerId": 383390
+    },
+    {
+      "id": 537454,
+      "name": "Shahanaz Shaik",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-21",
+      "birthday": "1989-03-29",
+      "diet": "Non veg",
+      "skills": "Automation testing, Selenium",
+      "gender": "Female",
+      "mobile": "7675378984",
+      "managerId": 383390
+    },
+    {
+      "id": 907073,
+      "name": "Asif Shaik",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-22",
+      "birthday": "1989-03-30",
+      "diet": "Non veg",
+      "skills": "React JS, Node JS, Express JS",
+      "gender": "Male",
+      "mobile": "7625878984",
+      "managerId": 383390
+    },
+    {
+      "id": 685378,
+      "name": "Krishna Maheshwara",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-23",
+      "birthday": "1989-03-31",
+      "diet": "Non veg",
+      "skills": "React JS, Node JS, Express JS, Javas, Spring boot",
+      "gender": "Male",
+      "mobile": "7677878984",
+      "managerId": 383390
+    },
+    {
+      "id": 784424,
+      "name": "Sasata Mukharjee",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-24",
+      "birthday": "1989-04-01",
+      "diet": "Non veg",
+      "skills": "Java, Spring boot",
+      "gender": "Male",
+      "mobile": "7675870984",
+      "managerId": 383390
+    },
+    {
+      "id": 631468,
+      "name": "Ayesha",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-25",
+      "birthday": "1989-04-02",
+      "diet": "Non veg",
+      "skills": "Java, Spring boot",
+      "gender": "Female",
+      "mobile": "7605878984",
+      "managerId": 383390
+    },
+    {
+      "id": 648003,
+      "name": "Hari Krishna E",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-26",
+      "birthday": "1989-04-03",
+      "diet": "Non veg",
+      "skills": "Java, Spring boot",
+      "gender": "Male",
+      "mobile": "7675078984",
+      "managerId": 383390
+    },
+    {
+      "id": 276421,
+      "name": "Manikanta",
+      "project": "CGS",
+      "joiningDate": "2024-02-25",
+      "birthday": "1990-05-22",
+      "diet": "Non-Veg",
+      "skills": "SQL, Python, Data Engineering",
+      "gender": "Male",
+      "mobile": "7856589565",
+      "managerId": 383390
     }
   ],
   "polls": [
     {
-      "id": 1763909016064,
+      "id": 866138,
       "title": "Lunch",
       "options": [
         {
@@ -39,19 +199,15 @@
         },
         {
           "label": "Non Veg",
-          "votes": 1
+          "votes": 0
         },
         {
           "label": "Egg",
           "votes": 0
         }
       ],
-      "votedUsers": [
-        1763905627976.059
-      ],
-      "userVotes": {
-        "1763905627976.059": "Non Veg"
-      }
+      "votedUsers": [],
+      "managerId": 383390
     }
   ]
 }

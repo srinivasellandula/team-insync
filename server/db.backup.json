@@ -1,0 +1,78 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "mobile": "8142088088",
+      "password": "8142088088",
+      "role": "manager",
+      "name": "Manager"
+    },
+    {
+      "id": 1763905627976.059,
+      "mobile": "7675878984",
+      "password": "7675878984",
+      "role": "user",
+      "name": "Srinivas Ellandula"
+    },
+    {
+      "id": 2,
+      "mobile": "9999999999",
+      "password": "9999999999",
+      "role": "manager",
+      "name": "Test Manager 2"
+    }
+  ],
+  "resources": [
+    {
+      "id": 1763905627974.1663,
+      "name": "Srinivas Ellandula",
+      "project": "PSCRF",
+      "joiningDate": "2024-11-25",
+      "birthday": "1989-03-27",
+      "diet": "Non veg",
+      "skills": "React JS, Node JS, Express JS",
+      "gender": "Male",
+      "mobile": "7675878984",
+      "managerId": 1
+    },
+    {
+      "id": 2,
+      "name": "Test Manager 2",
+      "project": "Test Project",
+      "joiningDate": "2024-11-25",
+      "birthday": "1990-01-01",
+      "diet": "Veg",
+      "skills": "Management",
+      "gender": "Female",
+      "mobile": "9999999999",
+      "managerId": 2
+    }
+  ],
+  "polls": [
+    {
+      "id": 1763909016064,
+      "title": "Lunch",
+      "options": [
+        {
+          "label": "Veg",
+          "votes": 0
+        },
+        {
+          "label": "Non Veg",
+          "votes": 1
+        },
+        {
+          "label": "Egg",
+          "votes": 0
+        }
+      ],
+      "votedUsers": [
+        1763905627976.059
+      ],
+      "userVotes": {
+        "1763905627976.059": "Non Veg"
+      },
+      "managerId": 1
+    }
+  ]
+}

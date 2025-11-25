@@ -103,7 +103,10 @@ const ResourceList = ({ user }) => {
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}${endpoint}`,
         {
           method: currentResource ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-id': user.id
+          },
           body: JSON.stringify(formData),
         }
       );
@@ -163,6 +166,9 @@ const ResourceList = ({ user }) => {
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/resources/bulk`,
         {
           method: 'POST',
+          headers: {
+            'x-user-id': user.id
+          },
           body: formData,
         }
       );

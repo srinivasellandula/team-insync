@@ -63,29 +63,66 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// Get Resources
+// Helper to generate 6-digit ID
+const generateId = () => Math.floor(100000 + Math.random() * 900000);
+
+// Get Resources (Filtered by Manager)
 app.get('/api/resources', (req, res) => {
   const db = readDb();
-  res.json(db.resources);
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId) {
+    return res.json(db.resources); // Fallback for backward compatibility/testing
+  }
+
+  const user = db.users.find(u => u.id == userId);
+  
+  if (user && user.role === 'manager') {
+    // Manager sees only their own resources
+    const managerResources = db.resources.filter(r => r.managerId == userId);
+    res.json(managerResources);
+  } else if (user && user.role === 'user') {
+    // User sees resources under the same manager (their team)
+    // First find this user's resource record to get their managerId
+    const userResource = db.resources.find(r => r.mobile === user.mobile);
+    if (userResource && userResource.managerId) {
+      const teamResources = db.resources.filter(r => r.managerId == userResource.managerId);
+      res.json(teamResources);
+    } else {
+      // Fallback: see only themselves if not linked to a manager properly
+      res.json(db.resources.filter(r => r.mobile === user.mobile));
+    }
+  } else {
+    res.json([]);
+  }
 });
 
 // Add Resource (Manager only) - Auto Create User
 app.post('/api/resources', (req, res) => {
   const db = readDb();
   const { mobile, name } = req.body;
+  const managerId = req.headers['x-user-id'];
+
+  if (!managerId) {
+    return res.status(400).json({ message: 'Manager ID required' });
+  }
 
   // Check unique mobile
   if (db.resources.some(r => r.mobile === mobile)) {
     return res.status(400).json({ message: 'Mobile number already exists' });
   }
 
-  const newResource = { id: Date.now(), ...req.body };
+  const newResource = { 
+    id: generateId(), 
+    ...req.body,
+    managerId: Number(managerId) // Assign to current manager
+  };
   db.resources.push(newResource);
 
   // Auto-create user
   if (!db.users.some(u => u.mobile === mobile)) {
     db.users.push({
-      id: Date.now() + 1,
+      id: generateId(),
       mobile: mobile,
       password: mobile, // Password same as mobile
       role: 'user',
@@ -133,6 +170,11 @@ app.post('/api/resources/bulk', upload.single('file'), (req, res) => {
     return res.status(400).json({ message: 'No file uploaded' });
   }
 
+  const managerId = req.headers['x-user-id'];
+  if (!managerId) {
+    return res.status(400).json({ message: 'Manager ID required' });
+  }
+
   try {
     const workbook = xlsx.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
@@ -143,13 +185,26 @@ app.post('/api/resources/bulk', upload.single('file'), (req, res) => {
     let addedCount = 0;
     let skippedCount = 0;
 
+    console.log('=== BULK UPLOAD DEBUG ===');
+    console.log(`Total rows in Excel: ${data.length}`);
+    console.log('First row sample:', JSON.stringify(data[0], null, 2));
+    console.log('========================');
+
     data.forEach(row => {
       // Map Excel headers to DB fields
-      const mobile = String(row['Mobile'] || '');
+      // Handle mobile as number or string from Excel
+      let mobile = row['Mobile'];
+      if (typeof mobile === 'number') {
+        mobile = String(Math.floor(mobile)); // Convert number to string, remove decimals
+      } else {
+        mobile = String(mobile || '').trim();
+      }
+      
+      console.log(`Processing row: ${row['Name']}, Mobile: ${mobile}, Type: ${typeof row['Mobile']}`);
       
       if (mobile && !db.resources.some(r => r.mobile === mobile)) {
         const newResource = {
-          id: Date.now() + Math.random(),
+          id: generateId(),
           name: row['Name'],
           project: row['Project'],
           joiningDate: parseDate(row['Joining Date']),
@@ -157,7 +212,8 @@ app.post('/api/resources/bulk', upload.single('file'), (req, res) => {
           diet: row['Diet'] || 'Veg',
           skills: row['Skills'],
           gender: row['Gender'] || row['Sex'] || 'Male', // Support both headers
-          mobile: mobile
+          mobile: mobile,
+          managerId: Number(managerId) // Assign to current manager
         };
         
         db.resources.push(newResource);
@@ -165,7 +221,7 @@ app.post('/api/resources/bulk', upload.single('file'), (req, res) => {
         // Auto-create user
         if (!db.users.some(u => u.mobile === mobile)) {
           db.users.push({
-            id: Date.now() + Math.random() + 1,
+            id: generateId(),
             mobile: mobile,
             password: mobile,
             role: 'user',
@@ -173,8 +229,10 @@ app.post('/api/resources/bulk', upload.single('file'), (req, res) => {
           });
         }
         addedCount++;
+        console.log(`✓ Added: ${row['Name']}`);
       } else {
         skippedCount++;
+        console.log(`✗ Skipped: ${row['Name']} (${mobile ? 'duplicate' : 'no mobile'})`);
       }
     });
 
@@ -192,9 +250,16 @@ app.post('/api/resources/bulk', upload.single('file'), (req, res) => {
 app.put('/api/resources/:id', (req, res) => {
   const db = readDb();
   const { id } = req.params;
+  const managerId = req.headers['x-user-id'];
+  
   const resourceIndex = db.resources.findIndex(r => r.id == id);
   
   if (resourceIndex !== -1) {
+    // Verify ownership
+    if (managerId && db.resources[resourceIndex].managerId != managerId) {
+      return res.status(403).json({ message: 'Unauthorized access to this resource' });
+    }
+
     // Validate mobile number uniqueness (excluding current resource)
     if (req.body.mobile) {
       const existingResource = db.resources.find(r => r.mobile === req.body.mobile && r.id != id);
@@ -228,9 +293,16 @@ app.put('/api/resources/:id', (req, res) => {
 app.delete('/api/resources/:id', (req, res) => {
   const db = readDb();
   const { id } = req.params;
+  const managerId = req.headers['x-user-id'];
+
   const resource = db.resources.find(r => r.id == id);
   
   if (resource) {
+    // Verify ownership
+    if (managerId && resource.managerId != managerId) {
+      return res.status(403).json({ message: 'Unauthorized access to this resource' });
+    }
+
     // Delete the resource
     db.resources = db.resources.filter(r => r.id != id);
     
@@ -267,20 +339,50 @@ app.delete('/api/resources/:id', (req, res) => {
   }
 });
 
-// Get Polls
+// Get Polls (Filtered by Manager)
 app.get('/api/polls', (req, res) => {
   const db = readDb();
-  res.json(db.polls);
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId) {
+    return res.json(db.polls);
+  }
+
+  const user = db.users.find(u => u.id == userId);
+  
+  if (user && user.role === 'manager') {
+    // Manager sees only their own polls
+    const managerPolls = db.polls.filter(p => p.managerId == userId);
+    res.json(managerPolls);
+  } else if (user && user.role === 'user') {
+    // User sees polls from their manager
+    const userResource = db.resources.find(r => r.mobile === user.mobile);
+    if (userResource && userResource.managerId) {
+      const teamPolls = db.polls.filter(p => p.managerId == userResource.managerId);
+      res.json(teamPolls);
+    } else {
+      res.json([]);
+    }
+  } else {
+    res.json([]);
+  }
 });
 
 // Create Poll (Manager only)
 app.post('/api/polls', (req, res) => {
   const db = readDb();
+  const managerId = req.headers['x-user-id'];
+
+  if (!managerId) {
+    return res.status(400).json({ message: 'Manager ID required' });
+  }
+
   const newPoll = { 
-    id: Date.now(), 
+    id: generateId(), 
     ...req.body, 
     options: req.body.options.map(opt => ({ label: opt, votes: 0 })),
-    votedUsers: [] 
+    votedUsers: [],
+    managerId: Number(managerId) // Assign to current manager
   };
   db.polls.push(newPoll);
   writeDb(db);
@@ -324,10 +426,17 @@ app.post('/api/polls/:id/vote', (req, res) => {
 app.delete('/api/polls/:id', (req, res) => {
   const db = readDb();
   const { id } = req.params;
-  const filteredPolls = db.polls.filter(p => p.id != id);
-  
-  if (db.polls.length !== filteredPolls.length) {
-    db.polls = filteredPolls;
+  const managerId = req.headers['x-user-id'];
+
+  const poll = db.polls.find(p => p.id == id);
+
+  if (poll) {
+    // Verify ownership
+    if (managerId && poll.managerId != managerId) {
+      return res.status(403).json({ message: 'Unauthorized access to this poll' });
+    }
+
+    db.polls = db.polls.filter(p => p.id != id);
     writeDb(db);
     res.json({ success: true });
   } else {

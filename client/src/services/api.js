@@ -19,11 +19,14 @@ export const apiRequest = async (endpoint, options = {}) => {
     'Content-Type': 'application/json',
   };
 
+  const user = JSON.parse(localStorage.getItem('user'));
+  
   const config = {
     ...options,
     headers: {
       ...defaultHeaders,
       ...options.headers,
+      ...(user?.id && { 'X-User-Id': user.id }),
     },
   };
 
